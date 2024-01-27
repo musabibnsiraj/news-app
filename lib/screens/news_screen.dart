@@ -8,17 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constant.dart';
 
-class ContactsScreen extends StatefulWidget {
-  const ContactsScreen({Key? key}) : super(key: key);
+class NewsScreen extends StatefulWidget {
+  const NewsScreen({Key? key}) : super(key: key);
 
   @override
-  State<ContactsScreen> createState() => _ContactsScreenState();
+  State<NewsScreen> createState() => _NewsScreenState();
 }
 
-class _ContactsScreenState extends State<ContactsScreen> {
+class _NewsScreenState extends State<NewsScreen> {
   List<Article> allArticles = [];
-  List<Article> filteredContacts = [];
-  List<Article> allContacts = [];
   TextEditingController searchController = TextEditingController();
   bool loading = false;
   String selectedCategory = 'all';
@@ -96,9 +94,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
       body: SafeArea(
           child: Stack(
         children: [
-          const SizedBox(
-            height: 10,
-          ),
+          const Divider(color: Colors.white),
           Column(
             children: [
               const SizedBox(
@@ -110,7 +106,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Text(
                             'Sort By',
@@ -122,36 +118,45 @@ class _ContactsScreenState extends State<ContactsScreen> {
                           ),
                         ]),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Expanded(
                           child: Theme(
                             data: ThemeData.dark(),
-                            child: DropdownButton<String>(
-                              value: selectedSortBy,
-                              onChanged: (String? newValue) async {
-                                setState(() {
-                                  selectedSortBy = newValue!;
-                                  selectedCategory = 'all';
-                                });
-                                if (selectedSortBy == 'all') {
-                                  await getAllNews(text: searchText);
-                                } else {
-                                  await getAllNews(
-                                      sort: selectedSortBy, text: searchText);
-                                }
-                              },
-                              style: const TextStyle(color: Colors.white),
-                              items: sortBy.map<DropdownMenuItem<String>>(
+                            child: Center(
+                              child: DropdownButton<String>(
+                                value: selectedSortBy,
+                                onChanged: (String? newValue) async {
+                                  setState(() {
+                                    selectedSortBy = newValue!;
+                                    selectedCategory = 'all';
+                                    searchText = searchController.text;
+                                  });
+                                  if (selectedSortBy == 'all') {
+                                    await getAllNews(text: searchText);
+                                  } else {
+                                    await getAllNews(
+                                        sort: selectedSortBy, text: searchText);
+                                  }
+                                },
+                                style: const TextStyle(color: Colors.white),
+                                items: sortBy.map<DropdownMenuItem<String>>(
                                   (Map<String, String> item) {
-                                return DropdownMenuItem<String>(
-                                  value: item.keys.first,
-                                  child: Text(
-                                    item.values.first,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                );
-                              }).toList(),
+                                    return DropdownMenuItem<String>(
+                                      value: item.keys.first,
+                                      child: Align(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          item.values.first,
+                                          style: const TextStyle(
+                                              color: Colors.white),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ).toList(),
+                              ),
                             ),
                           ),
                         ),
@@ -159,42 +164,44 @@ class _ContactsScreenState extends State<ContactsScreen> {
                         Expanded(
                           child: Theme(
                             data: ThemeData.dark(),
-                            child: DropdownButton<String>(
-                              value: selectedCategory,
-                              onChanged: (String? newValue) async {
-                                setState(() {
-                                  selectedCategory = newValue!;
-                                  selectedSortBy = 'all';
-                                });
-                                if (selectedCategory == 'all') {
-                                  await getAllNews(text: searchText);
-                                } else {
-                                  await getTopHeadingsByCategory(
-                                      category: selectedCategory,
-                                      searchText: searchText);
-                                }
-                              },
-                              style: const TextStyle(color: Colors.white),
-                              items: categories.map<DropdownMenuItem<String>>(
-                                  (Map<String, String> item) {
-                                return DropdownMenuItem<String>(
-                                  value: item.keys.first,
-                                  child: Text(
-                                    item.values.first,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                );
-                              }).toList(),
+                            child: Center(
+                              child: DropdownButton<String>(
+                                value: selectedCategory,
+                                onChanged: (String? newValue) async {
+                                  setState(() {
+                                    selectedCategory = newValue!;
+                                    selectedSortBy = 'all';
+                                    searchText = searchController.text;
+                                  });
+                                  if (selectedCategory == 'all') {
+                                    await getAllNews(text: searchText);
+                                  } else {
+                                    await getTopHeadingsByCategory(
+                                        category: selectedCategory,
+                                        searchText: searchText);
+                                  }
+                                },
+                                style: const TextStyle(color: Colors.white),
+                                items: categories.map<DropdownMenuItem<String>>(
+                                    (Map<String, String> item) {
+                                  return DropdownMenuItem<String>(
+                                    value: item.keys.first,
+                                    child: Text(
+                                      item.values.first,
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
+                    const Divider(color: Colors.white),
                   ],
                 ),
-              ),
-              const SizedBox(
-                height: 10,
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -206,9 +213,13 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       labelText: 'Search Articles',
                       suffixIcon: searchController.text.isNotEmpty
                           ? IconButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 // Clear the search field
                                 searchController.clear();
+                                setState(() {
+                                  searchText = '';
+                                });
+                                await getAllNews();
                               },
                               icon: Icon(
                                 Icons.clear,

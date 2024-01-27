@@ -7,7 +7,6 @@ import '../../app_config.dart';
 class ArticleProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
-
   final List<Article> _allArticles = [];
   List<Article> get getAllArticle => [..._allArticles];
   static const apiKey = AppConfig.apiKey;
@@ -27,7 +26,7 @@ class ArticleProvider with ChangeNotifier {
           'sortBy': sortBy, // Only include 'sortBy' if sortBy is not null
       });
 
-      // Clear existing contacts before adding new ones
+      // Clear existing news before adding new ones
       _allArticles.clear();
 
       if (res != null && res['status'] == "ok") {
@@ -39,9 +38,6 @@ class ArticleProvider with ChangeNotifier {
           }
         }
       }
-
-      _isLoading = false;
-      notifyListeners(); // Notify listeners after the asynchronous operation
     } catch (e) {
       // If an error occurs during the process, show an error message
       Utill.showError("Error: $e");
@@ -55,6 +51,7 @@ class ArticleProvider with ChangeNotifier {
       {String? category, String? searchText}) async {
     // Ensure that the method is not called during the build phase
     try {
+      _isLoading = true;
       final res = await WebClient().get('top-headlines', params: {
         'category': category,
         'apiKey': apiKey,
@@ -64,7 +61,7 @@ class ArticleProvider with ChangeNotifier {
           'q': searchText, // Only include 'q' if searchText is not null
       });
 
-      // Clear existing contacts before adding new ones
+      // Clear existing news before adding new ones
       _allArticles.clear();
 
       if (res != null && res['status'] == "ok") {
@@ -76,9 +73,6 @@ class ArticleProvider with ChangeNotifier {
           }
         }
       }
-
-      _isLoading = false;
-      notifyListeners(); // Notify listeners after the asynchronous operation
     } catch (e) {
       // If an error occurs during the process, show an error message
       Utill.showError("Error: $e");

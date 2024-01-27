@@ -54,7 +54,7 @@ class _MyAppState extends State<MyApp> {
               .copyWith(background: appBgColor),
         ),
         debugShowCheckedModeBanner: false,
-        home: const ContactsScreen(),
+        home: const NewsScreen(),
       ),
     );
   }
